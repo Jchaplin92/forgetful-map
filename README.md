@@ -1,7 +1,7 @@
 # forgetful-map app
 - author: Joe Chaplin
 - languages/technologies: Java17/Maven
-- created: 24th Apr 2022
+- created: version 1 on 24th Apr 2022, version 2 on 27th August 2022
 
 ---
 
@@ -12,12 +12,12 @@ From text-processor app's top level directory in a command line environment:
 1. you must have maven and the Java Runtime Environment installed - check that you are at least version 8 with:
 `java -version` from command line. Check maven is installed with `maven -version` from command line.
 2. `mvn package` to create the jar
-3. `java -jar target/forgetful-map-1.0-SNAPSHOT.jar` to run.
+3. `java -jar target/forgetful-map-2.0-SNAPSHOT.jar` to run.
 
 
 ## Design choices
-- The entire concept of a forgetting-map sounds like a CDN (Content Delivery Network); and given more time would make a good model for this solution.
-- No mention of the type of data to be associated - for simplicity we have assumed string data input via command line - but we have left ForgetfulMap itself as an interface capable of being implemented with other data types later on if need be
-- For simplicity we have left this app as a command line application
-- There is an implicit assumption that there is 1 key to 1 content but the hypothetical user may be unfamiliar with software/collection/programming conventions and expect the option to use multiple keys to single or multiple contents (for instance if by 'key' they mean 'news topic')
-- We have added complexity due to the 'tiebreaker' solving requirement.
+- I opted for a Spring application for easier HTTP input (localhost:8080 calls) and automatic thread safety
+- Desired separate data structure ordering keys by lookup count (thus avoiding dual sources of truth) but as lookup count is constantly mutating it was simpler albeit less efficient to simply stream the minimum element
+  - With longer time would have implemented a min heap - elements on mutation would compare to parents else children (the transitive property of comparison would make this sufficient). However the amount of complexity this would introduce was undesirable as none of the Java standard library's collections are a suitable substitute.
+  - Created a TreeSet with comparator drawing on the hashMap delegate's lookup counts. Consequently this design is quite efficient but had problems adding elements probably relating to the comparator implementation
+  - Considered PriorityQueue but ordering takes place on adding items only and heapify as a private method cannot be done on poll. This is a problem as the lookup count changes continuously. 
